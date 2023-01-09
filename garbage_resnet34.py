@@ -136,12 +136,12 @@ class ResNet(nn.Module):
 
 def train():
 
-    # net = ResNet(6)
+    net = ResNet(6)
 #    print(net)
-    if use_gpu:
-        net = t.load(model)
-    else:
-        net = t.load(model, 'cpu')
+    # if use_gpu:
+    #     net = t.load(model)
+    # else:
+    #     net = t.load(model, 'cpu')
 
     if use_gpu:
         net = net.cuda()
@@ -194,7 +194,7 @@ def train():
             running_loss += loss.item()
             if i % 50 == 49: # 每50个batch打印一下训练状态
                 
-                loss_count.append(running_loss / 50)
+                loss_count.append(running_loss.item() / 50)
                 net.eval()
                 with t.no_grad():
                     for data in testloader:
@@ -222,10 +222,10 @@ def train():
                         train_correct += (predicted == labels).sum()
                     #print('测试集中的准确率为: %d %%' % (100 * train_correct / train_total))
                 
-                test_accuracy_count.append((100 * correct / total))
-                train_accuracy_count.append((100 * train_correct / train_total))
+                test_accuracy_count.append((100 * correct.item() / total.item()))
+                train_accuracy_count.append((100 * train_correct.item() / train_total.item()))
                 Diff = (100 * train_correct / train_total) - (100 * correct / total)
-                diff_count.append(Diff)
+                diff_count.append(Diff.item())
                 
                 print('[%d, %5d] loss: %.3f  test_accuracy:%.3f  train_accuracy:%.3f' \
                       % (epoch+1, i+1, running_loss / 50, 100 * correct / total,100 * train_correct / train_total ) )  
@@ -243,35 +243,20 @@ def train():
             pickle.dump([loss_count, test_accuracy_count, train_accuracy_count, diff_count], f)
     t.save(net, model)
     end = time.time()
-    print("训练完毕！总耗时：%d 秒" % (end - start))           
                 
     plt.figure(1)            
-    plt.figure('CNN_Loss')
+    plt.figure('Loss')
     plt.plot(loss_count,label='Loss')
     plt.legend()
     plt.show()
     
     
     plt.figure(2)            
-    plt.figure('CNN_Aest_Accuracy')
-    plt.plot(test_accuracy_count,label='Test_Accuracy')
+    plt.figure('Accuracy')
+    plt.plot(test_accuracy_count,label='test_accuracy')
+    plt.plot(train_accuracy_count,label='train_accuracy')
     plt.legend()
     plt.show()
-    
-    plt.figure(3)            
-    plt.figure('CNN_Train_Accuracy')
-    plt.plot(train_accuracy_count,label='Train_Accuracy')
-    plt.legend()
-    plt.show()
-
-    plt.figure(4)            
-    plt.figure('CNN_Diff_Accuracy')
-    plt.plot(diff_count,label='Diff_Accuracy')
-    plt.legend()
-    plt.show()
-    
-
-
 
     t.save(net, model)
 
@@ -298,8 +283,8 @@ def test():
             total += labels.size(0)
             correct += (predicted == labels).sum()
     
-    print('测试集中的准确率为: %d %%' % (100 * correct / total))
+    print('测试集中的准确率为: %f %%' % (100 * correct / total))
 
 
-train()
+# train()
 test()
